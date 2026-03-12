@@ -9,6 +9,30 @@ string name;
 int quantity;
 
 };
+//issue equipment
+void issueEquipment(vector<Equipment>&equipments){
+    if(equipments.empty()){
+        cout<<"No Equipment is Available"<<endl;
+
+    }
+    int id;
+    cout<<"Enter A Id To Issue : ";
+    cin>>id;
+    for(auto &e : equipments){
+        if(e.id==id){
+            if(e.quantity>0){
+                e.quantity--;
+                cout<<"Quantity Issued Successfully"<<endl;
+                cout<<"Remaining Quantity"<<e.quantity<<endl;
+            }else{
+                cout<<"Quantity Is Out Of Stock"<<endl;
+            }
+            return;
+        }   
+     }
+
+cout<<"Equipment With This Id Is Not Found";
+}
 // to save file
 void saveToFile(const vector<Equipment>& equipments){
     ofstream file("equipment.txt");
@@ -146,7 +170,7 @@ cout<<"Equipment With This Is Id Is Not Found!"<<endl;
 
 int main(){
     vector<Equipment> equipments;
-
+loadFromFile(equipments);
     int choice;
     while(true){
     cout << "=====================================";
@@ -160,7 +184,8 @@ int main(){
     cout<<"3.Search Equipments"<<endl;
     cout<<"4.Update Quantity"<<endl;
     cout<<"5.Delete Equipment"<<endl;
-    cout<<"6.Exit "<<endl;
+    cout<<"6.Issue Equipment "<<endl;
+    cout<<"7. Exit"<<endl;
     cin>>choice;
     if(cin.fail()){
         cin.clear();
@@ -175,6 +200,7 @@ int main(){
     
     if(choice==1){
         addEquipment(equipments);
+        saveToFile(equipments);
     }else if (choice==2){
         viewEquipment(equipments);
     }
@@ -184,19 +210,26 @@ int main(){
     else if (choice ==4){
 
     updateQuantity(equipments);
+            saveToFile(equipments);
+
     }
     else if(choice==5){
         deleteEquipment(equipments);
+            saveToFile(equipments);
     }
     else if(choice ==6){
+        issueEquipment(equipments);
+    saveToFile(equipments);
+}   
+else if(choice==7){
         cout<<"Exiting System"<<endl;
+        break;
     }
     else{
         cout<<"Invalid Choice, Try Again";
     }   
         cout<<endl;
     }
-        return 0;
         saveToFile(equipments);
         addEquipment(equipments);
 }
