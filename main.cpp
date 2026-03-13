@@ -1,3 +1,4 @@
+#include <cstdlib>
 #include <iostream>
 #include <limits>
 #include <vector>
@@ -9,6 +10,26 @@ string name;
 int quantity;
 
 };
+//Return Equipment
+void returnEquipment(vector<Equipment>& equipments){
+if(equipments.empty()){
+        cout<<"No Equipment is Available"<<endl;
+        int id;
+        cout<<"Enter Equipment ID To Return : ";
+        cin>>id;
+         for(auto &e : equipments){
+        if(e.id==id){
+                e.quantity++;
+                cout<<"Quantity Return Successfully"<<endl;
+                cout<<"Update Quantity"<<e.quantity<<endl;
+            }else{
+                cout<<"Quantity Is Out Of Stock"<<endl;
+            }
+            return;
+        }   
+    }   
+    cout<<"Equipment With This Id Is Not Found !";
+}
 //issue equipment
 void issueEquipment(vector<Equipment>&equipments){
     if(equipments.empty()){
@@ -222,6 +243,12 @@ loadFromFile(equipments);
     saveToFile(equipments);
 }   
 else if(choice==7){
+        cout<<"Return Equipment"<<endl;
+        returnEquipment(equipments);
+    saveToFile(equipments);
+        
+    }
+    else if(choice==8){
         cout<<"Exiting System"<<endl;
         break;
     }
