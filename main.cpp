@@ -19,6 +19,26 @@ void updateQuantity(vector<Equipment>& equipments);
 void deleteEquipment(vector<Equipment>& equipments);
 void saveToFile(const vector<Equipment>& equipments);
 void loadFromFile(vector<Equipment>& equipments);
+
+//login function for student
+bool studentLogin(){
+string username;
+string password;
+cout<<"Enter Username : ";
+cin>>username;
+cout<<"Enter Password : ";
+cin>>password;
+if(username=="student" && password=="1111"){
+cout<<"Student logged In Successfully";
+return true;
+}
+else{
+    cout<<"Invalid username or password ";
+    return false;
+}
+
+}
+
     //student menu function
     void studentMenu(vector<Equipment>& equipments){
         int choice;
@@ -54,6 +74,24 @@ void loadFromFile(vector<Equipment>& equipments);
 
         }
 
+    }
+    //faculty login
+    bool facultyLogin(){
+        string username;
+        string password;
+        cout<<"Enter Username :";
+        cin>>username;
+        cout<<"Enter Password : ";
+        cin>>password;
+        if(username=="admin" && password=="1234"){
+            cout<<"Fauclty Logged In Successfully"<<endl;
+            return true;
+        }
+            else{
+                cout<<"Invalid Username Or Password"<<endl;
+                return false;
+            }
+    
     }
     //Faculty menu
 void facultyMenu(vector<Equipment>& equipments){
@@ -292,10 +330,14 @@ void facultyMenu(vector<Equipment>& equipments){
         cin>>choice;
 
         if(choice==1){
-            studentMenu(equipments);
+           if(studentLogin()){
+        studentMenu(equipments);
+    }
         }
         else if(choice==2){
-            facultyMenu(equipments);
+             if(facultyLogin()){
+        facultyMenu(equipments);
+    }
         }
         else if(choice==3){
             cout<<"Exiting System"<<endl;
