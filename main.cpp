@@ -20,25 +20,87 @@ void deleteEquipment(vector<Equipment>& equipments);
 void saveToFile(const vector<Equipment>& equipments);
 void loadFromFile(vector<Equipment>& equipments);
 
-//login function for student
-bool studentLogin(){
-string username;
-string password;
-cout<<"Enter Username : ";
-cin>>username;
-cout<<"Enter Password : ";
-cin>>password;
-if(username=="student" && password=="1111"){
-cout<<"Student logged In Successfully";
-return true;
+struct User{
+    string username;
+    string password;
+    string role; // student or faculty
+};
+
+
+//load users from file 
+void loadUsers(vector<User>& users){
+
+    ifstream file("users.txt");
+
+    if(!file) return;
+
+    User u;
+
+    while(getline(file,u.username,'|')){
+        getline(file,u.password,'|');
+        getline(file,u.role);
+
+        users.push_back(u);
+    }
+
+    file.close();
 }
-else{
-    cout<<"Invalid username or password ";
+
+//save users to file
+void saveUsers(const vector<User>& users){
+
+    ofstream file("users.txt");
+
+    for(const auto& u : users){
+        file<<u.username<<"|"<<u.password<<"|"<<u.role<<endl;
+    }
+
+    file.close();
+}
+
+
+//register new user
+void registerUser(vector<User>& users){
+
+    User u;
+
+    cout<<"Enter Username: ";
+    cin>>u.username;
+
+    cout<<"Enter Password: ";
+    cin>>u.password;
+
+    cout<<"Enter Role (student/faculty): ";
+    cin>>u.role;
+
+    users.push_back(u);
+
+    saveUsers(users);
+
+    cout<<"User Registered Successfully\n";
+}
+
+//login system
+bool login(vector<User>& users,string& role){
+
+    string username,password;
+
+    cout<<"Enter Username: ";
+    cin>>username;
+
+    cout<<"Enter Password: ";
+    cin>>password;
+
+    for(auto& u: users){
+
+        if(u.username==username && u.password==password){
+            role=u.role;
+            return true;
+        }
+    }
+
     return false;
 }
-
-}
-
     //student menu function
     void studentMenu(vector<Equipment>& equipments){
         int choice;
@@ -74,25 +136,7 @@ else{
 
         }
 
-    }
-    //faculty login
-    bool facultyLogin(){
-        string username;
-        string password;
-        cout<<"Enter Username :";
-        cin>>username;
-        cout<<"Enter Password : ";
-        cin>>password;
-        if(username=="admin" && password=="1234"){
-            cout<<"Fauclty Logged In Successfully"<<endl;
-            return true;
-        }
-            else{
-                cout<<"Invalid Username Or Password"<<endl;
-                return false;
-            }
-    
-    }
+    }   
     //Faculty menu
 void facultyMenu(vector<Equipment>& equipments){
     int choice;
@@ -316,6 +360,8 @@ void facultyMenu(vector<Equipment>& equipments){
 
     vector<Equipment> equipments;
     loadFromFile(equipments);
+    vector<User> users;
+    loadUsers(users);
     int choice;
     while(true){
 
@@ -323,30 +369,39 @@ void facultyMenu(vector<Equipment>& equipments){
         cout << "Laboratory Equipment Management System\n";
         cout << "=====================================\n";
 
-        cout<<"1. Student"<<endl;
-        cout<<"2. Faculty"<<endl;
+        cout<<"1. Register"<<endl;
+        cout<<"2. Login"<<endl;
         cout<<"3. Exit"<<endl;
 
         cin>>choice;
+if(choice==1){
+    registerUser(users);
+}
+else if(choice==2){
 
-        if(choice==1){
-           if(studentLogin()){
-        studentMenu(equipments);
+    string role;
+
+    if(login(users,role)){
+
+        if(role=="student"){
+            studentMenu(equipments);
+        }
+        else if(role=="faculty"){
+            facultyMenu(equipments);
+        }
+
+    }else{
+        cout<<"Invalid Username or Password"<<endl;
     }
-        }
-        else if(choice==2){
-             if(facultyLogin()){
-        facultyMenu(equipments);
-    }
-        }
-        else if(choice==3){
-            cout<<"Exiting System"<<endl;
-            break;
-        }
-        else{
-            cout<<"Invalid Choice, Try Again"<<endl;
-        }
-    }
+}
+else if(choice==3){
+    cout<<"Exiting System"<<endl;
+    break;
+}
+else{
+    cout<<"Invalid Choice, Try Again"<<endl;
+}
 
     saveToFile(equipments);
 }
+    }
