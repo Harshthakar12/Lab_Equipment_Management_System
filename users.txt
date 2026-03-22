@@ -1,0 +1,2 @@
+Harsh|123|student
+harsh|faculty|faculty
