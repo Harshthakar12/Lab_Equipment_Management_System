@@ -52,7 +52,7 @@ void saveUsers(const vector<User>& users){
     ofstream file("users.txt");
 
     for(const auto& u : users){
-        file<<u.username<<"|"<<u.password<<"|"<<u.role<<endl;
+            file<<u.username<<"|"<<u.password<<"|"<<u.role<<endl;
     }
 
     file.close();
@@ -66,13 +66,32 @@ void registerUser(vector<User>& users){
 
     cout<<"Enter Username: ";
     cin>>u.username;
+    for(const auto& existing : users){
+    if(existing.username == u.username){
+        cout<<"Username already exists!\n";
+        return;
+    }
+}
 
     cout<<"Enter Password: ";
     cin>>u.password;
 
-    cout<<"Enter Role (student/faculty): ";
-    cin>>u.role;
+    int roleChoice;
 
+    cout<<"1. Student\n2. Faculty\nChoose Role: ";
+    cin>>roleChoice;
+
+    if(roleChoice==1){
+    u.role="student";
+    }
+    else if(roleChoice==2){
+    u.role="faculty";
+    }
+    else{
+    cout<<"Invalid Role\n";
+    return;
+    }
+    
     users.push_back(u);
 
     saveUsers(users);
@@ -127,7 +146,7 @@ bool login(vector<User>& users,string& role){
             saveToFile(equipments);  
         }
         else if(choice==5){
-            cout<<"Loging Out"<<endl;
+            cout<<"Logging Out"<<endl;
             break;
 
         }else{
@@ -301,7 +320,7 @@ void facultyMenu(vector<Equipment>& equipments){
             cout<<endl;
             return;
         }
-        cout<<"--Equipment List--";
+            cout<<"\n-- Equipment List --\n";            
             for(const auto&e : equipments){
                 cout<<"ID : "<<e.id;
                 cout<<" Name: "<<e.name;
@@ -402,6 +421,7 @@ else{
     cout<<"Invalid Choice, Try Again"<<endl;
 }
 
-    saveToFile(equipments);
 }
+    saveToFile(equipments);
+
     }
