@@ -274,6 +274,27 @@
     int id;
     cout<<"Enter A Id To Issue : ";
     cin>>id;
+    ifstream checkFile("issued.txt");
+    string line;
+
+    while(getline(checkFile, line)){
+    
+    stringstream ss(line);
+    string fileUser, idStr;
+
+    getline(ss, fileUser, '|');
+    getline(ss, idStr);
+
+    int fileId = stoi(idStr);
+
+    if(fileUser == username && fileId == id){
+        cout<<"You already issued this equipment!\n";
+        checkFile.close();
+        return;
+    }   
+    }
+
+checkFile.close();
 
     for(auto &e : equipments){
 
