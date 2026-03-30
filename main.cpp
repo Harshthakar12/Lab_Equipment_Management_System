@@ -47,6 +47,47 @@
 
             file.close();
         }
+        //view all issued equipment (admin can see username id and name)
+        void viewAllIssued(vector<Equipment>& equipments){
+
+    ifstream file("issued.txt");
+
+    if(!file){
+        cout<<"No issued records found\n";
+        return;
+    }
+
+    string line;
+    bool found = false;
+
+    cout<<"\nIssued Records:\n";
+
+    while(getline(file, line)){
+        stringstream ss(line);
+        string username, idStr;
+
+        getline(ss, username, '|');
+        getline(ss, idStr);
+
+        int id = stoi(idStr);
+
+        // find equipment name
+        for(const auto& e : equipments){
+            if(e.id == id){
+                cout<<"User: "<<username
+                    <<" | ID: "<<e.id
+                    <<" | Name: "<<e.name<<endl;
+                found = true;
+            }
+        }
+    }
+
+    if(!found){
+        cout<<"No records found\n";
+    }
+
+    file.close();
+}
 
         //save users to file
         void saveUsers(const vector<User>& users){
@@ -213,6 +254,7 @@
                 cout<<"4. Update Quantity"<<endl;
                 cout<<"5. Delete Equipment"<<endl;
                 cout<<"6. Logout"<<endl;
+                cout << "7. View All Issued Equipment"<<endl;
                 cin>>choice;
                 if(choice==1){
                     addEquipment(equipments);
@@ -235,6 +277,9 @@
                 else if(choice==6){
                     cout<<"Logging Out...\n";
                     break;
+                }
+                else if(choice == 7) {
+                    viewAllIssued(equipments);  
                 }
                 else{
                     cout<<"Invalid Choice\n";
@@ -496,6 +541,48 @@
 
 
             //view my equipment in a correct  way
+            void viewMyIssued(vector<Equipment>& equipments, string username) {
+
+            ifstream file("issued.txt");
+
+            if (!file) {    
+              cout << "No issued records found\n";
+            return;
+            }
+
+    string line;
+    bool found = false;
+
+    cout << "\nYour Issued Equipment:\n";
+
+    while (getline(file, line)) {
+        stringstream ss(line);
+        string fileUser, idStr;
+
+        getline(ss, fileUser, '|');
+        getline(ss, idStr);
+
+        if (fileUser == username) {
+
+            int id = stoi(idStr);
+
+            // Find equipment name
+            for (const auto& e : equipments) {
+                if (e.id == id) {
+                    cout << "ID: " << e.id 
+                         << " | Name: " << e.name << endl;
+                    found = true;
+                }
+            }
+        }
+    }
+
+    if (!found) {
+        cout << "No equipment issued\n";
+    }
+
+    file.close();
+}
 
             int main(){
     cout << "Check folder: creating test file\n";
