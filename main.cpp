@@ -15,7 +15,7 @@
         void viewEquipment(const vector<Equipment>& equipments);
         void searchEquipment(const vector<Equipment>& equipments);
         void issueEquipment(vector<Equipment>& equipments, string username);   
-        void returnEquipment(vector<Equipment>& equipments);
+        void returnEquipment(vector<Equipment>& equipments, string username)  ;      
         void addEquipment(vector<Equipment>& equipments);
         void updateQuantity(vector<Equipment>& equipments);
         void deleteEquipment(vector<Equipment>& equipments);
@@ -188,7 +188,7 @@
                     viewMyIssued(equipments, username);
                 }
                 else if(choice==5){         
-                    returnEquipment(equipments); 
+                    returnEquipment(equipments, username); 
                     saveToFile(equipments);  
                 }
                 else if(choice==6){
@@ -243,25 +243,65 @@
             }
         }
             //Return Equipment
-            void returnEquipment(vector<Equipment>& equipments){
-            if(equipments.empty()){
-                    cout<<"No Equipment is Available"<<endl;
-                    return;
-            }
-                    int id;
-                    cout<<"Enter Equipment ID To Return : ";
-                    cin>>id;
-                    for(auto &e : equipments){
-                    if(e.id==id){
-                            e.quantity++;
-                            cout<<"Quantity Return Successfully"<<endl;
-                            cout<<"Update Quantity: "<<e.quantity<<endl;
-                        return;
-                        }
-                    }   
-                
-                cout<<"Equipment With This Id Is Not Found !";
-            }
+           void returnEquipment(vector<Equipment>& equipments, string username) {
+
+    ifstream file("issued.txt");
+    if (!file) {
+        cout << "No issued records found\n";
+        return;
+    }
+
+    int id;
+    cout << "Enter Equipment ID To Return: ";
+    cin >> id;
+
+    vector<string> records;
+    string line;
+    bool found = false;
+
+    // Read all records
+    while (getline(file, line)) {
+        stringstream ss(line);
+        string fileUser, idStr;
+
+        getline(ss, fileUser, '|');
+        getline(ss, idStr);
+
+        int fileId = stoi(idStr);
+
+        // Match user + id
+        if (fileUser == username && fileId == id && !found) {
+            found = true;
+
+            // increase quantity
+            for (auto &e : equipments) {
+                if (e.id == id) {
+                    e.quantity++;
+                }
+                          }
+
+            continue; // skip this record (delete)
+                 }
+
+        records.push_back(line);
+             }
+
+             file.close();
+
+            if (!found) {
+        cout << "You did not issue this equipment!\n";
+        return;
+        }
+
+    // Rewrite file (without removed record)
+    ofstream outFile("issued.txt");
+    for (const auto& r : records) {
+        outFile << r << endl;
+    }
+    outFile.close();
+
+    cout << "Equipment returned successfully!\n";
+}
             //issue equipment
             
         void issueEquipment(vector<Equipment>&equipments, string username){
@@ -455,7 +495,7 @@
             }
 
 
-
+            //view my equipment in a correct  way
 
             int main(){
     cout << "Check folder: creating test file\n";
