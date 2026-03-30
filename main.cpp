@@ -1,3 +1,5 @@
+        #include <fstream>
+        #include <sstream>
         #include <cstdlib>
         #include <iostream>
         #include <limits>
@@ -58,7 +60,46 @@
         file.close();
     }
 
+    // what student has actully issued
+    void viewMyIssued(const vector<Equipment>& equipments, string username){
+    
+    ifstream file("issued.txt");
 
+    if(!file){
+        cout<<"No issued records found\n";
+        return;
+    }
+
+    string line;
+    bool found = false;
+
+    while(getline(file, line)){
+        
+        stringstream ss(line);
+        string fileUser, idStr;
+
+        getline(ss, fileUser, '|');
+        getline(ss, idStr);
+
+        int id = stoi(idStr);
+
+        if(fileUser == username){
+            
+            for(const auto& e : equipments){
+                if(e.id == id){
+                    cout<<"ID: "<<e.id<<" | Name: "<<e.name<<endl;
+                    found = true;
+                }
+            }
+        }
+    }
+
+    if(!found){
+        cout<<"No equipment issued by you\n";
+    }
+
+    file.close();
+}
     //register new user
     void registerUser(vector<User>& users){
 
@@ -128,7 +169,8 @@
             cout<<"1. View Equipment"<<endl;
             cout<<"2. Search Equipment"<<endl;
             cout<<"3. Issue Equipment"<<endl;
-            cout<<"4. Return Equipment"<<endl;
+            cout<<"4. View my Equipment"<<endl;
+            cout<<"5. Return Equipment"<<endl;
             cout<<"5. Logout"<<endl;
             cin>>choice;
             if(choice==1){
@@ -142,10 +184,13 @@
                 saveToFile(equipments);
             }
             else if(choice==4){
+                   viewMyIssued(equipments, username);
+            }
+            else if(choice==5){
                 returnEquipment(equipments); 
                 saveToFile(equipments);  
             }
-            else if(choice==5){
+            else if(choice==6){
                 cout<<"Logging Out"<<endl;
                 break;
 
@@ -217,7 +262,9 @@
             cout<<"Equipment With This Id Is Not Found !";
         }
         //issue equipment
+        
     void issueEquipment(vector<Equipment>&equipments, string username){
+        
 
     if(equipments.empty()){
         cout<<"No Equipment is Available"<<endl;
