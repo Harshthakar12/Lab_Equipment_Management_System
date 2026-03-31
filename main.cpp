@@ -4,14 +4,15 @@
             #include <iostream>
             #include <limits>
             #include <vector>
-            #include <fstream>
             using namespace std;
             struct Equipment{
             int id;
             string name;
             int quantity;
         };
-
+        void viewMyIssued(vector<Equipment>& equipments, string username);
+        string getCurrentDate();
+        string getDueDate();
         void viewEquipment(const vector<Equipment>& equipments);
         void searchEquipment(const vector<Equipment>& equipments);
         void issueEquipment(vector<Equipment>& equipments, string username);   
@@ -64,10 +65,13 @@
 
     while(getline(file, line)){
         stringstream ss(line);
-        string username, idStr;
+
+      string username, idStr, issueDate, dueDate;
 
         getline(ss, username, '|');
-        getline(ss, idStr);
+        getline(ss, idStr, '|');
+        getline(ss, issueDate, '|');
+        getline(ss, dueDate);
 
         int id = stoi(idStr);
 
@@ -75,8 +79,11 @@
         for(const auto& e : equipments){
             if(e.id == id){
                 cout<<"User: "<<username
-                    <<" | ID: "<<e.id
-                    <<" | Name: "<<e.name<<endl;
+                <<" | ID: "<<e.id
+                <<" | Name: "<<e.name
+                <<" | Issue: "<<issueDate
+                <<" | Due: "<<dueDate
+                 <<endl;
                 found = true;
             }
         }
@@ -101,46 +108,7 @@
             file.close();
         }
 
-        // what student has actully issued
-        void viewMyIssued(const vector<Equipment>& equipments, string username){
-        
-        ifstream file("issued.txt");
-
-        if(!file){
-            cout<<"No issued records found\n";
-            return;
-        }
-
-        string line; 
-        bool found = false;
-
-        while(getline(file, line)){
-            
-            stringstream ss(line);
-            string fileUser, idStr;
-
-            getline(ss, fileUser, '|');
-            getline(ss, idStr);
-
-            int id = stoi(idStr);
-
-            if(fileUser == username){
-                
-                for(const auto& e : equipments){
-                    if(e.id == id){
-                        cout<<"ID: "<<e.id<<" | Name: "<<e.name<<endl;
-                        found = true;
-                    }
-                }
-            }
-        }
-
-        if(!found){
-            cout<<"No equipment issued by you\n";
-        }
-
-        file.close();
-    }
+       
         //register new user
         void registerUser(vector<User>& users){
 
@@ -237,7 +205,7 @@
                     break;
 
                 }else{
-                    cout<<"Inavlid Choice"<<endl;
+                    cout<<"Invalid Choice"<<endl;
                 }
 
                 }
@@ -288,11 +256,9 @@
             }
         }
             //Return Equipment
-           void returnEquipment(vector<Equipment>& equipments, string username) {
-
-    ifstream file("issued.txt");
-    if (!file) {
-        cout << "No issued records found\n";
+void returnEquipment(vector<Equipment>& equipments, string username) {
+    if(equipments.empty()){
+        cout << "No Equipment is Available" << endl;
         return;
     }
 
@@ -300,52 +266,55 @@
     cout << "Enter Equipment ID To Return: ";
     cin >> id;
 
-    vector<string> records;
-    string line;
     bool found = false;
 
-    // Read all records
-    while (getline(file, line)) {
-        stringstream ss(line);
-        string fileUser, idStr;
+    // 1️⃣ Update quantity in memory
+    for(auto &e : equipments){
+        if(e.id == id){
+            e.quantity++;
+            cout << "Quantity Returned Successfully" << endl;
+            cout << "Updated Quantity: " << e.quantity << endl;
+            found = true;
+            break;
+        }
+    }
 
-        getline(ss, fileUser, '|');
-        getline(ss, idStr);
+    if(!found){
+        cout << "Equipment with this ID is not found!" << endl;
+        return;
+    }
+
+    // 2️⃣ Remove the returned equipment from issued.txt
+    ifstream inFile("issued.txt");
+    ofstream outFile("temp.txt");
+    string line;
+
+    while(getline(inFile, line)){
+    stringstream ss(line);
+
+    string fileUser, idStr, issueDate, dueDate;
+
+    getline(ss, fileUser, '|');
+    getline(ss, idStr, '|');
+    getline(ss, issueDate, '|');
+    getline(ss, dueDate);
 
         int fileId = stoi(idStr);
 
-        // Match user + id
-        if (fileUser == username && fileId == id && !found) {
-            found = true;
-
-            // increase quantity
-            for (auto &e : equipments) {
-                if (e.id == id) {
-                    e.quantity++;
-                }
-                          }
-
-            continue; // skip this record (delete)
-                 }
-
-        records.push_back(line);
-             }
-
-             file.close();
-
-            if (!found) {
-        cout << "You did not issue this equipment!\n";
-        return;
+        // Write all except the returned record
+        if(!(fileUser == username && fileId == id)){
+            outFile << line << endl;
         }
-
-    // Rewrite file (without removed record)
-    ofstream outFile("issued.txt");
-    for (const auto& r : records) {
-        outFile << r << endl;
     }
+
+    inFile.close();
     outFile.close();
 
-    cout << "Equipment returned successfully!\n";
+    // Replace old issued.txt with updated temp file
+    remove("issued.txt");
+    rename("temp.txt", "issued.txt");
+
+    cout << "Return process completed successfully!" << endl;
 }
             //issue equipment
             
@@ -393,9 +362,12 @@
                     cout<<"Quantity Issued Successfully"<<endl;
                     cout<<"Remaining Quantity: "<<e.quantity<<endl;
 
-                    // 🔥 NEW FEATURE
+                    //NEW FEATURE
                     ofstream file("issued.txt", ios::app);
-                    file << username << "|" << id << endl;
+                    string issueDate = getCurrentDate();
+                    string dueDate = getDueDate();
+
+                    file << username << "|" << id << "|" << issueDate << "|" << dueDate << endl;                    
                     file.close();
 
                 }else{
@@ -475,7 +447,7 @@
             cout<<"Enter Equipment Name : ";
             cin.ignore(numeric_limits<streamsize>::max(), '\n');
             getline(cin,e.name);
-            cout<<"Enter A Quantity";
+            cout<<"Enter A Quantity: ";
             cin>>e.quantity;
             equipments.push_back(e);
             cout<<"Equipment Is Added Succesfully";
@@ -495,7 +467,7 @@
                         cout<<endl;
                     }
                 }
-            void searchEquipment(const vector<Equipment>& equipments){  
+            void searchEquipment(const vector<Equipment>& equipments){      
                 if(equipments.empty()){
                     cout<<"Equipment Is Not Available"<<endl;
                     return;
@@ -557,10 +529,14 @@
 
     while (getline(file, line)) {
         stringstream ss(line);
-        string fileUser, idStr;
 
-        getline(ss, fileUser, '|');
-        getline(ss, idStr);
+       
+       string fileUser, idStr, issueDate, dueDate;
+
+                getline(ss, fileUser, '|');      // username
+                getline(ss, idStr, '|');         // id
+                getline(ss, issueDate, '|');     // issue date
+                getline(ss, dueDate);            // due date
 
         if (fileUser == username) {
 
@@ -569,8 +545,11 @@
             // Find equipment name
             for (const auto& e : equipments) {
                 if (e.id == id) {
-                    cout << "ID: " << e.id 
-                         << " | Name: " << e.name << endl;
+                   cout<<"ID: "<<e.id
+                <<" | Name: "<<e.name
+                <<" | Issue Date: "<<issueDate
+                <<" | Due Date: "<<dueDate
+                <<endl;
                     found = true;
                 }
             }
@@ -583,9 +562,31 @@
 
     file.close();
 }
+            //TO get current Date
+            #include <ctime>
 
+            string getCurrentDate() {
+             time_t now = time(0);
+             tm *ltm = localtime(&now);
+
+             int day = ltm->tm_mday;
+             int month = 1 + ltm->tm_mon;
+             int year = 1900 + ltm->tm_year;
+
+              return to_string(year) + "-" + to_string(month) + "-" + to_string(day);
+                }
+
+            //TO get due date 
+            string getDueDate() {
+            time_t now = time(0) + (7 * 24 * 60 * 60); // +7 days
+            tm *ltm = localtime(&now);
+            int day = ltm->tm_mday;
+            int month = 1 + ltm->tm_mon;
+            int year = 1900 + ltm->tm_year;
+
+    return to_string(year) + "-" + to_string(month) + "-" + to_string(day);
+}
             int main(){
-    cout << "Check folder: creating test file\n";
    
             vector<Equipment> equipments;
             loadFromFile(equipments);
